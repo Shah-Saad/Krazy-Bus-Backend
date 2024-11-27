@@ -11,7 +11,7 @@ module.exports = {
       },
 
       route_id: {
-          type: DataTypes.INTEGER,
+          type: Sequelize.INTEGER,
           allowNull: false,
           references: {
             model: 'routes',
@@ -20,7 +20,7 @@ module.exports = {
       },
 
       bus_id: {
-          type: DataTypes.INTEGER,
+          type: Sequelize.INTEGER,
           allowNull: false,
           references: {
               model: 'buses',

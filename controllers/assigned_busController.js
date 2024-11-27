@@ -76,6 +76,58 @@ module.exports = {
         }
     },
 
+    // Assign a bus to a route
+    create: async (req, res) => {
+        try {
+            const { bus_id, route_id } = req.body; // Get bus_id and route_id from request body
+
+            // Validate the bus ID
+            const bus = await Bus.findOne({ where: { id: bus_id } });
+            if (!bus) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Bus not found',
+                });
+            }
+
+            // Validate the route ID
+            const route = await Route.findOne({ where: { id: route_id } });
+            if (!route) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Route not found',
+                });
+            }
+
+            // Check if the bus is already assigned to the route
+            const existingAssignment = await AssignedBus.findOne({
+                where: { bus_id, route_id },
+            });
+            if (existingAssignment) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'This bus is already assigned to the route.',
+                });
+            }
+
+            // Create the assignment
+            const newAssignment = await AssignedBus.create({ bus_id, route_id });
+
+            return res.status(201).json({
+                success: true,
+                message: 'Bus assigned to route successfully',
+                assignedBus: newAssignment,
+            });
+        } catch (error) {
+            console.error('Error assigning bus to route:', error.message);
+            return res.status(500).json({
+                success: false,
+                error: error.message,
+            });
+        }
+    },
+
+
     // Assign or reassign a bus to a route
     updateRouteBus: async (req, res) => {
         try {

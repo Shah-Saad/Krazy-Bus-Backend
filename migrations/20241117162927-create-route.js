@@ -21,15 +21,6 @@ module.exports = {
           allowNull: false,
       },
 
-      bus_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'buses',
-            key: 'id'
-        },
-      },
-
       departure_time: {
           type: Sequelize.TIME,
           allowNull: false,

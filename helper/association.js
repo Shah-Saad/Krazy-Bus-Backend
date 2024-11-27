@@ -42,6 +42,20 @@ User.belongsToMany(Bus, {
     otherKey: 'bus_id',
 });
 
+// Explicit relationships for AssignedBus
+Assigned_Bus.belongsTo(Bus, { foreignKey: 'bus_id' });
+Assigned_Bus.belongsTo(Route, { foreignKey: 'route_id' });
+
+Route.hasMany(Assigned_Bus, { foreignKey: 'route_id' });
+Bus.hasMany(Assigned_Bus, { foreignKey: 'bus_id' });
+
+// Explicit relationships for AssignedDriver
+Assigned_Driver.belongsTo(Bus, { foreignKey: 'bus_id' });
+Assigned_Driver.belongsTo(Driver, { foreignKey: 'driver_id' });
+
+Bus.hasMany(Assigned_Driver, { foreignKey: 'bus_id' });
+Driver.hasMany(Assigned_Driver, { foreignKey: 'driver_id' });
+
 module.exports = {
     Bus,
     Route,

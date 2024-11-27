@@ -1,6 +1,6 @@
 const { where } = require('sequelize');
 const Driver = require('../models/Driver');
-const Bus = require('../models/Bus');
+const AssignedDriver = require('../models/Assigned_Driver');
 
 module.exports = {
     // Get a specific driver by ID
@@ -93,43 +93,49 @@ module.exports = {
         try {
             const driver_id = req.params.id;
 
-            const deleted = await Driver.destroy({ where: { id: driver_id } });
+            // Check if the driver is assigned to a bus
+            const assignment = await AssignedDriver.findOne({ where: { driver_id } });
+            if (assignment) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Driver is assigned to a bus and cannot be deleted',
+                });
+            }
 
+            // Delete the driver
+            const deleted = await Driver.destroy({ where: { id: driver_id } });
             if (!deleted) {
                 return res.status(404).json({ success: false, message: 'Driver not found' });
             }
 
             return res.status(200).json({ success: true, message: 'Driver deleted successfully' });
         } catch (error) {
-            console.log(error.message);
+            console.error(error.message);
             return res.status(500).json({ success: false, error: error.message });
         }
     },
-    
+
+    // Get unassigned drivers
     UnAssignedDrivers: async (req, res) => {
         try {
-            // Fetch all drivers
-            const drivers = await Driver.findAll({
-                
+            // Fetch all assigned driver IDs
+            const assignedDriverIds = await AssignedDriver.findAll({
+                attributes: ['driver_id'],
+            }).then((assignments) => assignments.map((assignment) => assignment.driver_id));
+
+            // Fetch drivers not in the assigned IDs
+            const unassignedDrivers = await Driver.findAll({
+                where: {
+                    id: {
+                        [require('sequelize').Op.notIn]: assignedDriverIds,
+                    },
+                },
             });
-    
-            // Fetch all buses with assigned drivers
-            const buses = await Bus.findAll({
-                attributes: ['driver_id'] // Fetch only the driver_id field
-            });
-    
-            // Extract driver IDs from buses
-            const assignedDriverIds = buses.map(bus => bus.driver_id);
-    
-            // Filter drivers to exclude those with IDs present in the assignedDriverIds
-            const unassignedDrivers = drivers.filter(driver => !assignedDriverIds.includes(driver.id));
-    
-            // Respond with the unassigned drivers
-           return res.status(200).json({ success : true ,  driver : unassignedDrivers });
+
+            return res.status(200).json({ success: true, drivers: unassignedDrivers });
         } catch (error) {
             console.error('Error fetching unassigned drivers:', error);
-            res.status(500).json({ error: 'An error occurred while fetching unassigned drivers.' });
+            return res.status(500).json({ success: false, error: error.message });
         }
-    }
-    
+    },
 };

@@ -39,6 +39,6 @@ module.exports = {
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Assigned_Drivers');
+    await queryInterface.dropTable('assigned_drivers');
   }
 };

@@ -38,4 +38,5 @@ const Assigned_Bus = sequelize.define(
     }
 );
 
+
 module.exports = Assigned_Bus;

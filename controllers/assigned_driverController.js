@@ -74,6 +74,58 @@ module.exports = {
         }
     },
 
+    // Assign a driver to a bus
+    create: async (req, res) => {
+        try {
+            const { bus_id, driver_id } = req.body; // Get bus_id and driver_id from request body
+
+            // Validate the driver ID
+            const driver = await Driver.findOne({ where: { id: driver_id } });
+            if (!driver) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Driver not found',
+                });
+            }
+
+            // Validate the bus ID
+            const bus = await Bus.findOne({ where: { id: bus_id } });
+            if (!bus) {
+                return res.status(404).json({
+                    success: false,
+                    message: 'Bus not found',
+                });
+            }
+
+            // Check if the driver is already assigned to the bus
+            const existingAssignment = await AssignedDriver.findOne({
+                where: { bus_id, driver_id },
+            });
+            if (existingAssignment) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'This driver is already assigned to the bus.',
+                });
+            }
+
+            // Create the assignment
+            const newAssignment = await AssignedDriver.create({ bus_id, driver_id });
+
+            return res.status(201).json({
+                success: true,
+                message: 'Driver assigned to bus successfully',
+                assignedDriver: newAssignment,
+            });
+        } catch (error) {
+            console.error('Error assigning driver to bus:', error.message);
+            return res.status(500).json({
+                success: false,
+                error: error.message,
+            });
+        }
+    },
+
+
     // Update the driver assigned to a bus
     updateBusDriver: async (req, res) => {
         try {

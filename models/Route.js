@@ -4,17 +4,13 @@ const {
     DataTypes
 } = require('sequelize');
 const sequelize = require('../config/database');
-const Bus = require('./Bus')
 
 const Route = sequelize.define(
     'routes', {
-        bus_id: {
+        id:{
             type: DataTypes.INTEGER,
             allowNull: false,
-            references: {
-                model: Bus,
-                key: 'id'
-            },
+            primaryKey: true,
         },
 
         start_location: {
