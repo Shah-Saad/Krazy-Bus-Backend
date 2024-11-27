@@ -6,8 +6,6 @@ const {
 
 const sequelize = require('../config/database');
 
-const Driver = require('./Driver')
-
 const Bus = sequelize.define(
     'buses', {
         id: {
@@ -21,15 +19,6 @@ const Bus = sequelize.define(
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-
-        driver_id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            references: {
-                model: Driver,
-                key: 'id'
-            },
-        }
 
     }
 );

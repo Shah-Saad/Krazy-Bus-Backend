@@ -13,20 +13,16 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
         unique: true,
+      },
+      password: {
+          type: Sequelize.STRING,
+          allowNull: true,
+      },
+      name: {
+          type: Sequelize.STRING,
+          allowNull: false,
 
-    },
-    password: {
-        type: Sequelize.STRING,
-        allowNull: true,
-    },
-    name: {
-        type: Sequelize.STRING,
-        allowNull: false,
-
-    },
-    role_id: {
-        type: Sequelize.BOOLEAN
-    },
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

@@ -1,88 +1,89 @@
+const { route } = require('..');
 const Bus = require('../models/Bus');
-const Driver = require('../models/Driver');
 
 module.exports = {
+    // Get a specific bus by ID
     getAll: async (req, res) => {
         try {
             const bus_id = req.params.id;
             const bus = await Bus.findOne({ where: { id: bus_id } });
 
-            return res.status(200).json({ success: true, bus: bus });
+            if (!bus) {
+                return res.status(404).json({ success: false, message: 'Bus not found' });
+            }
+
+            return res.status(200).json({ success: true, bus });
         } catch (error) {
             console.log(error.message);
             return res.status(500).json({ success: false, error: error.message });
         }
     },
 
-    //Assign driver to a specific bus
-    assignDriver: async (req, res) => {
+    // Create a new bus
+    createBus: async (req, res) => {
         try {
-            const { bus_id, driver_id } = req.body;
+            const { capacity } = req.body;
 
-            // Ensure the driver exists
-            const driver = await Driver.findOne({ where: { id: driver_id } });
-            if (!driver) return res.status(404).json({ success: false, message: 'Driver not found' });
-
-            // Check if the driver is already assigned to another bus
-            const existingAssignment = await Bus.findOne({ where: { driver_id } });
-            if (existingAssignment) {
-                return res.status(400).json({ success: false, message: 'Driver is already assigned to another bus' });
+            // Validate required fields
+            if (!capacity) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Capacity is required to create a bus',
+                });
             }
 
-            // Assign the driver to the bus
-            const bus = await Bus.update({ driver_id }, { where: { id: bus_id } });
+            // Create the bus
+            const newBus = await Bus.create({ capacity });
 
-            if (!bus[0]) return res.status(404).json({ success: false, message: 'Bus not found' });
-
-            return res.status(200).json({ success: true, message: 'Driver assigned successfully' });
+            return res.status(201).json({
+                success: true,
+                message: 'Bus created successfully',
+                bus: newBus,
+            });
         } catch (error) {
             console.error(error.message);
             return res.status(500).json({ success: false, error: error.message });
         }
     },
-
 
     // Get all buses
     getAllBuses: async (req, res) => {
         try {
             const buses = await Bus.findAll();
-            return res.status(200).json({ success: true, buses: buses});
+            return res.status(200).json({ success: true, buses });
         } catch (error) {
             console.error(error.message);
             return res.status(500).json({ success: false, error: error.message });
         }
     },
 
-    // create: async (req, res) => {
-    //     try {
-    //         const data = req.body;
-    //         const newBus = await Bus.create(data);
-
-    //         return res.status(201).json({ success: true, bus: newBus });
-    //     } catch (error) {
-    //         console.log(error.message);
-    //         return res.status(500).json({ success: false, error: error.message });
-    //     }
-    // },
-
+    // Update a bus
     update: async (req, res) => {
         try {
             const bus_id = req.params.id;
-            const data = req.body;
+            const { capacity } = req.body;
 
-            const updatedBus = await Bus.update(data, { where: { id: bus_id } });
-
-            if (updatedBus[0] === 0) {
+            // Check if the bus exists
+            const bus = await Bus.findByPk(bus_id);
+            if (!bus) {
                 return res.status(404).json({ success: false, message: 'Bus not found' });
             }
 
-            return res.status(200).json({ success: true, message: 'Bus updated successfully' });
+            // Update the bus with the new data
+            const updatedBus = await bus.update({ capacity });
+
+            return res.status(200).json({
+                success: true,
+                message: 'Bus updated successfully',
+                bus: updatedBus,
+            });
         } catch (error) {
-            console.log(error.message);
+            console.error(error.message);
             return res.status(500).json({ success: false, error: error.message });
         }
     },
 
+    // Delete a bus
     delete: async (req, res) => {
         try {
             const bus_id = req.params.id;
@@ -98,5 +99,29 @@ module.exports = {
             console.log(error.message);
             return res.status(500).json({ success: false, error: error.message });
         }
-    }
+    },
+
+    // Get unassigned buses (example logic assuming no direct relation to routes in the Bus model)
+    UnAssignedBuses: async (req, res) => {
+        try {
+            // Fetch all buses
+            const buses = await Bus.findAll();
+
+            // Fetch all routes with assigned buses (assuming you have a `Route` model)
+            const routes = await Route.findAll({
+                attributes: ['bus_id'], // Fetch only the bus_id field
+            });
+
+            // Extract bus IDs from routes
+            const assignedBusIds = routes.map(route => route.bus_id);
+
+            // Filter buses to exclude those with IDs present in the assignedBusIds
+            const unassignedBuses = buses.filter(bus => !assignedBusIds.includes(bus.id));
+
+            return res.status(200).json({ success: true, buses: unassignedBuses });
+        } catch (error) {
+            console.error('Error fetching unassigned buses:', error.message);
+            return res.status(500).json({ success: false, error: error.message });
+        }
+    },
 };

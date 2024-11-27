@@ -9,7 +9,7 @@ router.get('/get/:id', userController.getAll);
 router.get('/all', userController.getAllUsers);
 
 // Route to create a new user
-router.post('/', userController.create);
+router.post('/create', userController.create);
 
 // Route to update an existing user
 router.put('/update/:id', userController.update);

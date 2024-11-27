@@ -28,9 +28,6 @@ const User = sequelize.define(
             allowNull: false,
 
         },
-        role_id: {
-            type: DataTypes.BOOLEAN
-        },
 
     }
 

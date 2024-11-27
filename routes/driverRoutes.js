@@ -17,4 +17,6 @@ router.put('/update/:id', driverController.update);
 // Route to delete a driver
 router.delete('/delete/:id', driverController.delete);
 
+router.get('/un-assigned/all',driverController.UnAssignedDrivers)
+
 module.exports = router;
