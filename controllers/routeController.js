@@ -134,15 +134,21 @@ module.exports = {
                 return res.status(404).json({ success: false, message: 'Route not found' });
             }
 
-            // Delete associated bus assignments
-            await AssignedBus.destroy({ where: { route_id } });
+            // Check for assigned buses to the route
+            const assignedBuses = await AssignedBus.findAll({ where: { route_id } });
+            if (assignedBuses.length > 0) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Cannot delete the route as it has assigned buses.',
+                });
+            }
 
             // Delete the route
             await route.destroy();
 
             return res.status(200).json({ success: true, message: 'Route deleted successfully' });
         } catch (error) {
-            console.error(error.message);
+            console.error('Error deleting route:', error.message);
             return res.status(500).json({ success: false, error: error.message });
         }
     },
